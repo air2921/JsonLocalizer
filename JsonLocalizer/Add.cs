@@ -3,7 +3,6 @@ using Microsoft.Extensions.Hosting;
 
 namespace JsonLocalizer;
 
-
 public static class Add
 {
     /// <summary>
@@ -23,11 +22,9 @@ public static class Add
         services.AddSingleton<ICurrent, Current>();
         services.AddSingleton<ILocalizer, Localizer>();
 
-#if DEBUG
         Console.WriteLine($"Default Language {options.DefaultLanguage}");
         Console.WriteLine($"File with translations {options.LocalizationDirectory}");
         foreach (var lng in options.SupportedLanguages)
             Console.WriteLine($"Supported language: {lng}");
-#endif
     }
 }

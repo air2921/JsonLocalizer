@@ -8,14 +8,24 @@ public class LocalizerOptions(IHostEnvironment env)
     private string _defaultLanguage = string.Empty;
     private HashSet<string> _supportedLanguages = [];
 
+    public int BackStepCount { get; set; } = 0;
+
     public string LocalizationDirectory
     {
         get => _directory;
         set
         {
-            var directory = Path.Combine(env.ContentRootPath, value);
-            if (!Directory.Exists(directory) && Directory.GetFiles(directory, "*.json").Length <= 0)
-                throw new ArgumentException($"{nameof(LocalizationDirectory)} is not found, or {nameof(LocalizationDirectory)} has no '.json' files");
+            var backSteps = string.Join(Path.DirectorySeparatorChar.ToString(), Enumerable.Repeat("..", BackStepCount));
+            var directory = Path.Combine(env.ContentRootPath, backSteps, value);
+            try
+            {
+                if (Directory.GetFiles(directory, "*.json").Length <= 0)
+                    throw new ArgumentException($"{nameof(LocalizationDirectory)} has no '.json' files");
+            }
+            catch (DirectoryNotFoundException)
+            {
+                throw new ArgumentException($"{nameof(LocalizationDirectory)} is not found");
+            }
 
             _directory = directory;
         }
