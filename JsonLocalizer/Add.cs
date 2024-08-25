@@ -20,7 +20,15 @@ public static class Add
 
         services.AddSingleton(options);
         services.AddSingleton<ICurrent, Current>();
-        services.AddSingleton<ILocalizer, Localizer>();
+
+        services.AddSingleton<ILocalizer, NoneStaticLocalizer>(provider =>
+        {
+            var localizer = new NoneStaticLocalizer(
+                provider.GetRequiredService<ICurrent>(),
+                provider.GetRequiredService<LocalizerOptions>());
+            Localizer.SetLocalizer(localizer);
+            return localizer;
+        });
 
         Console.WriteLine($"Default Language {options.DefaultLanguage}");
         Console.WriteLine($"File with translations {options.LocalizationDirectory}");

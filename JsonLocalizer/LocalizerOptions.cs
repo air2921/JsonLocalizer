@@ -17,15 +17,8 @@ public class LocalizerOptions(IHostEnvironment env)
         {
             var backSteps = string.Join(Path.DirectorySeparatorChar.ToString(), Enumerable.Repeat("..", BackStepCount));
             var directory = Path.Combine(env.ContentRootPath, backSteps, value);
-            try
-            {
-                if (Directory.GetFiles(directory, "*.json").Length <= 0)
-                    throw new ArgumentException($"{nameof(LocalizationDirectory)} has no '.json' files");
-            }
-            catch (DirectoryNotFoundException)
-            {
-                throw new ArgumentException($"{nameof(LocalizationDirectory)} is not found");
-            }
+            if (Directory.GetFiles(directory, "*.json").Length <= 0)
+                throw new ArgumentException($"{nameof(LocalizationDirectory)} has no '.json' files");
 
             _directory = directory;
         }

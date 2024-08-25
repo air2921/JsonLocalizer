@@ -1,57 +1,19 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Concurrent;
-using System.Text;
+﻿namespace JsonLocalizer;
 
-namespace JsonLocalizer;
-
-public class Localizer(ICurrent current, LocalizerOptions options) : ILocalizer
+public static class Localizer
 {
-    private static readonly ConcurrentDictionary<string, Dictionary<string, string>> _translations = [];
+    private static ILocalizer? _localizer;
 
-    public string Translate(string key)
+    public static void SetLocalizer(ILocalizer localizer)
     {
-        if (!options.SupportedLanguages.Contains(current.CurrentLanguage))
-            return key;
-
-        if (!_translations.ContainsKey(current.CurrentLanguage))
-            Initialize(current.CurrentLanguage);
-
-        if (!_translations.TryGetValue(current.CurrentLanguage, out Dictionary<string, string> translations))
-            return key;
-
-        if (!translations.TryGetValue(key, out string value))
-            return key;
-
-        return value;
+        _localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
     }
 
-    public void Initialize(string language)
+    public static string Translate(string key)
     {
-        var translations = MergeJson(language);
-        _translations.TryAdd(language, translations);
+        if (_localizer is null)
+            throw new InvalidOperationException("Localizer has not been initialized");
+
+        return _localizer.Translate(key);
     }
-
-    private Dictionary<string, string> MergeJson(string language)
-    {
-        var files = Directory.GetFiles(options.LocalizationDirectory, $"*.{language}.json");
-        var translations = new Dictionary<string, string>();
-
-        foreach (var file in files)
-        {
-            var json = File.ReadAllText(file, Encoding.UTF8);
-            var jsonObjects = JsonConvert.DeserializeObject<IEnumerable<JsonObject>>(json);
-
-            if (jsonObjects is not null)
-                foreach (var obj in jsonObjects)
-                    translations[obj.Key] = obj.Value;
-        }
-
-        return translations;
-    }
-}
-
-public interface ILocalizer
-{
-    void Initialize(string language);
-    string Translate(string key);
 }
