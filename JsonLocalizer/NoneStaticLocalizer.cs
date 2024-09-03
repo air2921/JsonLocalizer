@@ -8,15 +8,18 @@ public class NoneStaticLocalizer(ICurrent current, LocalizerOptions options) : I
 {
     private static readonly ConcurrentDictionary<string, Dictionary<string, string>> _translations = [];
 
-    public string Translate(string key)
+    public string Translate(string key, string? language = null)
     {
-        if (!options.SupportedLanguages.Contains(current.CurrentLanguage))
+        if (language is null || !options.SupportedLanguages.Contains(language))
+            language = current.CurrentLanguage;
+
+        if (!options.SupportedLanguages.Contains(language))
             return key;
 
-        if (!_translations.ContainsKey(current.CurrentLanguage))
-            Initialize(current.CurrentLanguage);
+        if (!_translations.ContainsKey(language))
+            Initialize(language);
 
-        if (!_translations.TryGetValue(current.CurrentLanguage, out Dictionary<string, string> translations))
+        if (!_translations.TryGetValue(language, out Dictionary<string, string> translations))
             return key;
 
         if (!translations.TryGetValue(key, out string value))
@@ -53,5 +56,5 @@ public class NoneStaticLocalizer(ICurrent current, LocalizerOptions options) : I
 public interface ILocalizer
 {
     void Initialize(string language);
-    string Translate(string key);
+    string Translate(string key, string? language = null);
 }

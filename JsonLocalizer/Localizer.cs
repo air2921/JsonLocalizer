@@ -9,11 +9,11 @@ public static class Localizer
         _localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
     }
 
-    public static string Translate(string key)
+    public static string Translate(string key, string? language = null)
     {
         if (_localizer is null)
             throw new InvalidOperationException("Localizer has not been initialized");
 
-        return _localizer.Translate(key);
+        return _localizer.Translate(key, language);
     }
 }
